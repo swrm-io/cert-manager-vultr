@@ -1,0 +1,74 @@
+version: '3'
+
+vars:
+  os:
+    sh: go env GOOS
+  arch:
+    sh: go env GOARCH
+  build_path: .build
+  tools_path: .build/tools
+  src_path: .build/src
+  envtest_version: v1.30.2
+
+tasks:
+  paths:
+    desc: create required paths for building and tools
+    cmds:
+      - mkdir -p {{.build_path}}
+      - mkdir -p {{.src_path}}
+      - mkdir -p {{.tools_path}}
+    status:
+      - test -d {{.build_path}}
+      - test -d {{.src_path}}
+      - test -d {{.tools_path}}
+
+  tools:
+    desc: Install tools for testing
+    deps:
+      - paths
+    cmds:
+      - mkdir -p {{.tools_path}}
+      - curl https://github.com/kubernetes-sigs/controller-tools/releases/download/envtest-{{.envtest_version}}/envtest-{{.envtest_version}}-{{.os}}-{{.arch}}.tar.gz -L -o {{.src_path}}/envtest.tar.gz
+      - tar -zxvf {{.src_path}}/envtest.tar.gz -C {{.tools_path}} --strip-components=2 controller-tools/envtest/
+    status:
+      - test -f {{.tools_path}}/etcd
+      - test -f {{.tools_path}}/kube-apiserver
+      - test -f {{.tools_path}}/kubectl
+    generates:
+      - "{{.tools_path}}/etcd"
+      - "{{.tools_path}}/kube-apiserver"
+      - "{{.tools_path}}/kubectl"
+
+  secret:
+    desc: Generate api secret file
+    env:
+      VULTR_API: ""
+    cmds:
+      - |
+        cat << 'EOF' > ./testdata/api-key.yaml
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: vultr-credentials
+        type: Opaque
+        data:
+          #apiKey: "<Add your Base64 encoded Vultr API Key here.>"
+          apiKey: "{{.VULTR_API}}"
+        EOF
+    status:
+      - test -f "testdata/api-key.yaml"
+    generates:
+      - "testdata/api-key.yaml"
+
+  test:
+    desc: run tests
+    env:
+      TEST_ASSET_ETCD: "{{.tools_path}}/etcd"
+      TEST_ASSET_KUBE_APISERVER: "{{.tools_path}}/kube-apiserver"
+      TEST_ASSET_KUBECTL: "{{.tools_path}}/kubectl"
+      TEST_ZONE_NAME: ""
+    deps:
+      - tools
+      - secret
+    cmds:
+      - go test . --count=1 -v
