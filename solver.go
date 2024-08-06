@@ -48,13 +48,14 @@ func (v *VultrSolver) Name() string {
 // provider accounts.
 // The stopCh can be used to handle early termination of the webhook, in cases
 // where a SIGTERM or similar signal is sent to the webhook process.
-func (v *VultrSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
+func (v *VultrSolver) Initialize(kubeClientConfig *rest.Config, _ <-chan struct{}) error {
 	client, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
 		v.logger.Error(err.Error())
 		return err
 	}
 	v.client = client
+
 	return nil
 }
 
@@ -63,16 +64,16 @@ func (v *VultrSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan st
 // This method should tolerate being called multiple times with the same value.
 // cert-manager itself will later perform a self check to ensure that the
 // solver has correctly configured the DNS provider.
-func (v *VultrSolver) Present(ch *cmacmev1alpha1.ChallengeRequest) error {
+func (v *VultrSolver) Present(req *cmacmev1alpha1.ChallengeRequest) error {
 	// Remove trailing . from ResolvedZone because the Vultr API
 	// doesn't like it.
-	zone := util.UnFqdn(ch.ResolvedZone)
-	fqdn := util.UnFqdn(ch.ResolvedFQDN)
+	zone := util.UnFqdn(req.ResolvedZone)
+	fqdn := util.UnFqdn(req.ResolvedFQDN)
 
 	// create a logger with standard fields
-	logger := v.logger.With(zap.Any("uid", ch.UID), zap.String("zone", zone), zap.String("fqdn", fqdn), zap.String("key", ch.Key))
+	logger := v.logger.With(zap.Any("uid", req.UID), zap.String("zone", zone), zap.String("fqdn", fqdn), zap.String("key", req.Key))
 
-	client, err := vultrClient(v.client, ch)
+	client, err := vultrClient(v.client, req)
 	if err != nil {
 		logger.Error("error creating vultr client", zap.Error(err))
 		return err
@@ -88,7 +89,7 @@ func (v *VultrSolver) Present(ch *cmacmev1alpha1.ChallengeRequest) error {
 
 	// lookup the record, vultr will error if we try to create
 	// the same record with the same key.  Return nil if one exists.
-	record, err := client.getTXTRecord(zone, fqdn, ch.Key)
+	record, err := client.getTXTRecord(zone, fqdn, req.Key)
 	if err != nil {
 		logger.Error("error getting DNS records", zap.Error(err))
 		return err
@@ -101,7 +102,7 @@ func (v *VultrSolver) Present(ch *cmacmev1alpha1.ChallengeRequest) error {
 
 	logger.Info("creating TXT record")
 
-	err = client.createTXTRecord(zone, fqdn, ch.Key)
+	err = client.createTXTRecord(zone, fqdn, req.Key)
 	if err != nil {
 		logger.Error("error creating record", zap.Error(err))
 		return err
@@ -117,16 +118,16 @@ func (v *VultrSolver) Present(ch *cmacmev1alpha1.ChallengeRequest) error {
 // value provided on the ChallengeRequest should be cleaned up.
 // This is in order to facilitate multiple DNS validations for the same domain
 // concurrently.
-func (v *VultrSolver) CleanUp(ch *cmacmev1alpha1.ChallengeRequest) error {
+func (v *VultrSolver) CleanUp(req *cmacmev1alpha1.ChallengeRequest) error {
 	// Remove trailing . from ResolvedZone because the Vultr API
 	// doesn't like it.
-	zone := util.UnFqdn(ch.ResolvedZone)
-	fqdn := util.UnFqdn(ch.ResolvedFQDN)
+	zone := util.UnFqdn(req.ResolvedZone)
+	fqdn := util.UnFqdn(req.ResolvedFQDN)
 
 	// create a logger with standard fields
-	logger := v.logger.With(zap.Any("uid", ch.UID), zap.String("zone", zone), zap.String("fqdn", fqdn))
+	logger := v.logger.With(zap.Any("uid", req.UID), zap.String("zone", zone), zap.String("fqdn", fqdn))
 
-	client, err := vultrClient(v.client, ch)
+	client, err := vultrClient(v.client, req)
 	if err != nil {
 		logger.Error("error creating vultr client", zap.Error(err))
 		return err
@@ -134,7 +135,7 @@ func (v *VultrSolver) CleanUp(ch *cmacmev1alpha1.ChallengeRequest) error {
 
 	// lookup the record, vultr will error if we try to create
 	// the same record with the same key.  Return nil if one exists.
-	record, err := client.getTXTRecord(zone, fqdn, ch.Key)
+	record, err := client.getTXTRecord(zone, fqdn, req.Key)
 	if err != nil {
 		logger.Error("error getting DNS records", zap.Error(err))
 		return err
@@ -152,5 +153,6 @@ func (v *VultrSolver) CleanUp(ch *cmacmev1alpha1.ChallengeRequest) error {
 	}
 
 	logger.Info("record deleted")
+
 	return nil
 }

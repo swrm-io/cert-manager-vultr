@@ -12,7 +12,12 @@ var GroupName = os.Getenv("GROUP_NAME")
 
 func main() {
 	logger, _ := zap.NewProduction()
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	if GroupName == "" {
 		logger.Fatal("GROUP_NAME must be specified")

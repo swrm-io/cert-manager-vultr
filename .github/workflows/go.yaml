@@ -16,10 +16,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.22'
+      - name: arduino/setup-task
+        uses: arduino/setup-task@v2.0.0
       - name: Build
-        run: go build -v ./...
+        run: task build
       - name: Test
-        run: go test -v ./...
+        run: task test
 
   lint:
     if: github.event_name == 'pull_request'

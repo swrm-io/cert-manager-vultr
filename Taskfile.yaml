@@ -60,6 +60,11 @@ tasks:
     generates:
       - "testdata/api-key.yaml"
 
+  lint:
+    desc: run linting
+    cmds:
+      - golangci-lint run -v
+
   test:
     desc: run tests
     env:
@@ -72,3 +77,8 @@ tasks:
       - secret
     cmds:
       - go test . --count=1 -v
+
+  build:
+    desc: build
+    cmds:
+      - go build .

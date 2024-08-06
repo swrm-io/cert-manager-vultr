@@ -19,14 +19,14 @@ type vultr struct {
 }
 
 // vultrClient returns a configured client to work with the vultr API.
-func vultrClient(clientset *kubernetes.Clientset, ch *cmacmev1alpha1.ChallengeRequest) (*vultr, error) {
+func vultrClient(clientset *kubernetes.Clientset, req *cmacmev1alpha1.ChallengeRequest) (*vultr, error) {
 	providerCfg := VultrProviderConfig{}
 
-	if ch.Config == nil {
+	if req.Config == nil {
 		return nil, fmt.Errorf("%w: missing vultr solver config", errInvalidProviderConfig)
 	}
 
-	if err := json.Unmarshal(ch.Config.Raw, &providerCfg); err != nil {
+	if err := json.Unmarshal(req.Config.Raw, &providerCfg); err != nil {
 		return nil, fmt.Errorf("%w: %w", errInvalidProviderConfig, err)
 	}
 
@@ -38,11 +38,12 @@ func vultrClient(clientset *kubernetes.Clientset, ch *cmacmev1alpha1.ChallengeRe
 		return nil, fmt.Errorf("%w: missing apiKeySecretRef.key", errInvalidProviderConfig)
 	}
 
-	namespace := ch.ResourceNamespace
+	namespace := req.ResourceNamespace
 	secretName := providerCfg.APIKeySecretRef.Name
-	secretApiKey := providerCfg.APIKeySecretRef.Key
+	secretAPIKey := providerCfg.APIKeySecretRef.Key
 
-	ctx, _ := context.WithTimeout(context.TODO(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
 	secret, err := clientset.CoreV1().Secrets(namespace).Get(
 		ctx,
 		secretName,
@@ -54,7 +55,7 @@ func vultrClient(clientset *kubernetes.Clientset, ch *cmacmev1alpha1.ChallengeRe
 		return nil, err
 	}
 
-	apiKey := secret.Data[secretApiKey]
+	apiKey := secret.Data[secretAPIKey]
 	if apiKey == nil {
 		return nil, fmt.Errorf("%w: api key not set", errInvalidVultrConfig)
 	}
@@ -103,10 +104,8 @@ func (v *vultr) getTXTRecord(zone string, fqdn string, key string) (*govultr.Dom
 
 		if meta.Links.Next == "" {
 			break
-		} else {
-			listOptions.Cursor = meta.Links.Next
-			continue
 		}
+		listOptions.Cursor = meta.Links.Next
 	}
 
 	return nil, nil
@@ -120,6 +119,7 @@ func (v *vultr) createTXTRecord(zone string, fqdn string, key string) error {
 		Data: key,
 		TTL:  60,
 	}
+
 	_, err := v.client.DomainRecord.Create(context.Background(), zone, record)
 	return err
 

@@ -3,12 +3,12 @@ linters:
     - errcheck
     - gosimple
     - govet
+    - gofmt
     - ineffassign
     - staticcheck
     - unused
     - cyclop
     - dupword
-    - wsl
     - varnamelen
     - usestdlibvars
     - unparam
@@ -22,3 +22,6 @@ linters:
 linters-settings:
   cyclop:
     max-complexity: 15
+
+run:
+  timeout: 5m
