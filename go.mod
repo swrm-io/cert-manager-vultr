@@ -6,7 +6,7 @@ require (
 	github.com/cert-manager/cert-manager v1.15.2
 	github.com/vultr/govultr/v2 v2.17.2
 	go.uber.org/zap v1.27.0
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.23.0
 	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.3
 )
