@@ -8,7 +8,7 @@ import (
 	"time"
 
 	cmacmev1alpha1 "github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
-	"github.com/vultr/govultr/v2"
+	"github.com/vultr/govultr/v3"
 	"golang.org/x/oauth2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -76,7 +76,7 @@ func vultrClient(clientset *kubernetes.Clientset, req *cmacmev1alpha1.ChallengeR
 // zoneExists validates that you have the correct
 // zone in vultr
 func (v *vultr) zoneExists(zone string) error {
-	_, err := v.client.Domain.Get(context.Background(), zone)
+	_, _, err := v.client.Domain.Get(context.Background(), zone)
 	return err
 }
 
@@ -87,7 +87,7 @@ func (v *vultr) getTXTRecord(zone string, fqdn string, key string) (*govultr.Dom
 
 	listOptions := &govultr.ListOptions{PerPage: 100}
 	for {
-		rl, meta, err := v.client.DomainRecord.List(context.Background(), zone, listOptions)
+		rl, meta, _, err := v.client.DomainRecord.List(context.Background(), zone, listOptions)
 		if err != nil {
 			return nil, err
 		}
@@ -120,7 +120,7 @@ func (v *vultr) createTXTRecord(zone string, fqdn string, key string) error {
 		TTL:  60,
 	}
 
-	_, err := v.client.DomainRecord.Create(context.Background(), zone, record)
+	_, _, err := v.client.DomainRecord.Create(context.Background(), zone, record)
 	return err
 
 }
