@@ -10,8 +10,8 @@ require (
 	github.com/vultr/govultr/v3 v3.11.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/oauth2 v0.23.0
-	k8s.io/apimachinery v0.31.1
-	k8s.io/client-go v0.31.1
+	k8s.io/apimachinery v0.31.2
+	k8s.io/client-go v0.31.2
 )
 
 require (
@@ -104,7 +104,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.31.1 // indirect
+	k8s.io/api v0.31.2 // indirect
 	k8s.io/apiextensions-apiserver v0.31.1 // indirect
 	k8s.io/apiserver v0.31.1 // indirect
 	k8s.io/component-base v0.31.1 // indirect
