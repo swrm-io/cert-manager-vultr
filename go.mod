@@ -2,7 +2,7 @@ module github.com/swrm-io/cert-manager-vultr
 
 go 1.23
 
-toolchain go1.23.4
+toolchain go1.23.5
 
 require (
 	github.com/cert-manager/cert-manager v1.16.2
