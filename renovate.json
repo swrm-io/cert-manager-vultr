@@ -6,7 +6,7 @@
   "packageRules": [
     {
       "matchDepTypes": ["action"],
-      "autoMerge": true
+      "automerge": true
     }
   ]
 }
