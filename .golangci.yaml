@@ -1,27 +1,37 @@
+version: "2"
 linters:
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - gofmt
-    - ineffassign
-    - staticcheck
-    - unused
+    - bodyclose
     - cyclop
     - dupword
-    - varnamelen
-    - usestdlibvars
-    - unparam
-    - revive
-    - prealloc
-    - misspell
-    - gocyclo
     - funlen
-    - bodyclose
-
-linters-settings:
-  cyclop:
-    max-complexity: 15
-
-run:
-  timeout: 5m
+    - gocyclo
+    - misspell
+    - prealloc
+    - revive
+    - unparam
+    - usestdlibvars
+    - varnamelen
+  settings:
+    cyclop:
+      max-complexity: 15
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
