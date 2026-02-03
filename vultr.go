@@ -113,7 +113,7 @@ func (v *vultr) getTXTRecord(zone string, fqdn string, key string) (*govultr.Dom
 
 // createTXTRecord creates a text record.
 func (v *vultr) createTXTRecord(zone string, fqdn string, key string) error {
-	record := &govultr.DomainRecordReq{
+	record := &govultr.DomainRecordCreateReq{
 		Name: fqdn,
 		Type: "TXT",
 		Data: key,
