@@ -6,7 +6,7 @@ toolchain go1.26.1
 
 require (
 	github.com/cert-manager/cert-manager v1.20.1
-	github.com/vultr/govultr/v3 v3.26.1
+	github.com/vultr/govultr/v3 v3.28.1
 	go.uber.org/zap v1.27.1
 	golang.org/x/oauth2 v0.35.0
 	k8s.io/apimachinery v0.35.3
@@ -42,7 +42,7 @@ require (
 	github.com/google/cel-go v0.26.0 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
