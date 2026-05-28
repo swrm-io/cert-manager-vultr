@@ -7,7 +7,7 @@ toolchain go1.26.1
 require (
 	github.com/cert-manager/cert-manager v1.20.1
 	github.com/vultr/govultr/v3 v3.28.1
-	go.uber.org/zap v1.27.1
+	go.uber.org/zap v1.28.0
 	golang.org/x/oauth2 v0.36.0
 	k8s.io/apimachinery v0.35.3
 	k8s.io/client-go v0.35.3
